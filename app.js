@@ -12,12 +12,12 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type');
   next();
 });
-
+//Select all data from all books
 app.get('/all', async (req, res) => {
   let books = await db.all('SELECT * FROM books ORDER BY authors, title');
   res.send(books);
 });
-
+//Select short data from all books (title, author, and id only)
 app.get('/all/short', async (req, res) =>{
   let items = await db.all('SELECT rowid, title, authors FROM books ORDER BY authors, title');
   res.send(items);
