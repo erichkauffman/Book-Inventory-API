@@ -52,11 +52,31 @@ app.post('/item', async (req, res) => {
 
 app.delete('/item/sell/:itemNumber', async (req, res) => {
   try{
+    let date = new Date();
+    let year = date.getFullYear().toString();
+    let month = (date.getMonth()+1).toString();
+    let day = date.getDate().toString();
+    let fullDate = year + '-' + month + '-' + day;
     let book = await db.all('SELECT * FROM books WHERE rowid = ?', req.params.itemNumber);
-
-    //INSERT MEANINGFUL PARAMS
-
+    db.run('INSERT INTO sold VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+           book[0].title,
+           book[0].authors,
+           book[0].isbn,
+           book[0].edition,
+           book[0].printing,
+           book[0].yr_print,
+           book[0].date_purch,
+           book[0].condition,
+           book[0].cover,
+           book[0].loc_purch,
+           book[0].amt_paid,
+           book[0].sell_price,
+           book[0].site,
+           fullDate
+          );
     db.run('DELETE FROM books WHERE rowid = ?', req.params.itemNumber);
+    let soldBook = await db.all('SELECT * FROM sold');
+    console.log(soldBook);
     res.sendStatus(200);
   }catch(err){
     console.err(err);
