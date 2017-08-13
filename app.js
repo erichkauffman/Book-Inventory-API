@@ -75,8 +75,6 @@ app.delete('/item/sell/:itemNumber', async (req, res) => {
            fullDate
           );
     db.run('DELETE FROM books WHERE rowid = ?', req.params.itemNumber);
-    let soldBook = await db.all('SELECT * FROM sold');
-    console.log(soldBook);
     res.sendStatus(200);
   }catch(err){
     console.err(err);
