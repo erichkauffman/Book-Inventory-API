@@ -7,25 +7,27 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE'); //Add more requests as used
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type');
   next();
 });
+
 //Select all data from all books
 app.get('/all', async (req, res) => {
-  let books = await db.all('SELECT * FROM books ORDER BY authors, title');
+  let books = await db.all('SELECT *, rowid FROM books ORDER BY authors, title');
   res.send(books);
 });
+
 //Select short data from all books (title, author, and id only)
-app.get('/all/short', async (req, res) =>{
+app.get('/all/short', async (req, res) => {
   let items = await db.all('SELECT rowid, title, authors FROM books ORDER BY authors, title');
   res.send(items);
 });
 
 app.post('/item', async (req, res) => {
   try{
-    db.run('INSERT INTO books VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    db.run('INSERT INTO books VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
            req.body.title,
            req.body.authors,
            req.body.isbn,
@@ -38,7 +40,8 @@ app.post('/item', async (req, res) => {
            req.body.loc_purch,
            req.body.amt_paid,
            req.body.sell_price,
-           req.body.site
+           req.body.site,
+           req.body.shelf
           );
     res.sendStatus(201);
   }catch(err){
@@ -47,7 +50,21 @@ app.post('/item', async (req, res) => {
   }
 });
 
-app.delete('/item/:itemNumber', async (req, res) => {
+app.delete('/item/sell/:itemNumber', async (req, res) => {
+  try{
+    let book = await db.all('SELECT * FROM books WHERE rowid = ?', req.params.itemNumber);
+
+    //INSERT MEANINGFUL PARAMS
+
+    db.run('DELETE FROM books WHERE rowid = ?', req.params.itemNumber);
+    res.sendStatus(200);
+  }catch(err){
+    console.err(err);
+    res.sendStatus(500);
+  }
+});
+
+app.delete('/item/delete/:itemNumber', async (req, res) => {
   try{
     db.run('DELETE FROM books WHERE rowid = ?', req.params.itemNumber);
     res.sendStatus(200);
